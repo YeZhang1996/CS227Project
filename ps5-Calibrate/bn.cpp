@@ -45,31 +45,31 @@ bn::ctpotentials bn::calibrate(const bn::cliquetree &ct,
 			const map<int,int> &alpha) const {
 /*---------------------------Initialize beta and mu---------------------------*/
 
-				bn::ctpotentials initpot;
-				//initialize beta
-                int i = 0;
-				for(vector<factor::scope>::const_iterator ni = ct.nodes.begin(); ni != ct.nodes.end(); ni++){
-					initpot.beta.push_back(factor(*ni,1));
-					for(map<int,int>::const_iterator ai = alpha.begin(); ai != alpha.end(); ai++){
-						if (ai->second == i){
-							initpot.beta[i] = initpot.beta[i]*factors.at(ai->first);
+					bn::ctpotentials initpot;
+					//initialize beta
+					int i = 0;
+					for(vector<factor::scope>::const_iterator ni = ct.nodes.begin(); ni != ct.nodes.end(); ni++){
+						initpot.beta.push_back(factor(*ni,1));
+						for(map<int,int>::const_iterator ai = alpha.begin(); ai != alpha.end(); ai++){
+							if (ai->second == i){
+								initpot.beta[i] = initpot.beta[i]*factors.at(ai->first);
+							}
+						}
+						i++;
+					}
+
+					//init mu
+					int j = 0;
+					for(multimap<int,int>::const_iterator ei = ct.adj.begin(); ei != ct.adj.end(); ei++){
+						i = ei->first;
+						j = ei->second;
+						if(i < j){
+							factor::scope sij;
+							set_intersection(ct.nodes[i].begin(),ct.nodes[i].end(),ct.nodes[j].begin(),ct.nodes[j].end(),
+											  inserter(sij,sij.begin()),cmpfirst);
+							initpot.mu.insert(make_pair(make_pair(i,j),factor(sij,1.0)));
 						}
 					}
-                    i++;
-				}
-
-				//init mu
-				int j = 0;
-				for(multimap<int,int>::const_iterator ei = ct.adj.begin(); ei != ct.adj.end(); ei++){
-					i = ei->first;
-					j = ei->second;
-					if(i < j){
-						factor::scope sij;
-						set_intersection(ct.nodes[i].begin(),ct.nodes[i].end(),ct.nodes[j].begin(),ct.nodes[j].end(),
-										  inserter(sij,sij.begin()),cmpfirst);
-						initpot.mu.insert(make_pair(make_pair(i,j),factor(sij,1.0)));
-					}
-				}
 
 /*----------------------------Initialization done------------------------------*/
 
@@ -146,7 +146,6 @@ bn::ctpotentials bn::calibrate(const bn::cliquetree &ct,
                     
 /*----------------------------Downward done-------------------------------------*/
             //}
-				return initpot;
-					
+	return initpot;				
 }
 
